@@ -1,0 +1,6 @@
+board:
+  name: rpi_3
+  full_name: Raspberry Pi 3 Model B and Model B+
+  vendor: raspberrypi
+  socs:
+    - name: bcm2837

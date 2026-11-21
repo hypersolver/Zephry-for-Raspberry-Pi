@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+if SOC_BCM2837
+
+# The architected timer is wired to the BCM2837 local controller.
+config ARM_ARCH_TIMER
+	default y if SYS_CLOCK_EXISTS
+
+config NUM_IRQS
+	default 4
+
+config SYS_CLOCK_HW_CYCLES_PER_SEC
+	default 19200000
+
+endif

@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+description: BCM2837 AUX mini-UART and auxiliary enable register
+compatible: "brcm,bcm2837-mini-uart"
+include: uart-controller.yaml
+properties:
+  reg:
+    required: true
+  clock-frequency:
+    required: true
+  current-speed:
+    required: true

@@ -1,0 +1,7 @@
+[all]
+arm_64bit=1
+kernel=kernel8-rpiduino.img
+kernel_address=0x200000
+device_tree=
+enable_uart=1
+core_freq=250

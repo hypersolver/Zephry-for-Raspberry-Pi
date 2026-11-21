@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Broadcom BCM2836/BCM2837 ARM-local interrupt controller
+compatible: "brcm,bcm2837-local-intc"
+include: base.yaml
+interrupt-cells:
+  - irq
+  - priority
+  - flags
