@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <zephyr/kernel.h>
 
+#ifdef CONFIG_SOC_BCM2837
+#include <rpiduino/gpio.hpp>
+#endif
+
 // Match Arduino's 32-bit millisecond counter and wraparound behavior.
 inline uint32_t millis()
 {

@@ -35,3 +35,14 @@ The earlier v4.4.1 Pi 3 heartbeats were confirmed on Pi 3B and Pi 3B+.
 UART RESET requires adapter TX to physical pin 10. Run the UART tool with reset --verify to collect the next boot on the same port.
 
 QEMU raspi3b confirmed a guest reset, fresh setup, and four heartbeats. Physical v4.5.0 validation is pending.
+
+## Additional validation builds
+
+- Pi 4B and Pi 5 use the upstream rpi_4b and rpi_5 targets. Pass --board rpi_4b or --board rpi_5 to the packaging script and place the ZIP files on an MBR/FAT32 microSD. Pi 4B uses GPIO14/15, while Pi 5 exposes its console on the dedicated three-pin debug connector.
+- For the Pi 3 UART updater, run west update fatfs, then build with -DRPIDUINO_SKETCH=uart_debug. With Ubuntu cross GCC, add -fno-stack-protector to EXTRA_CXXFLAGS for this bare-metal configuration.
+- UART update sends the image, writes and reads it back from FAT32, and selects it via RPINEXT.TXT. RESET reboots the board. BOOT-CLEAR removes the selection so the firmware uses the original kernel.
+- Pi 3 GPIO loopback uses -DRPIDUINO_SKETCH=gpio_loopback. Connect GPIO17 (header pin 11) to GPIO27 (header pin 13) with the board powered off.
+
+Zephyr v4.5.0 passed the QEMU Pi 3 boot, guest RESET, MBR/FAT32 write/readback,
+persistence across RESET, and rollback checks. Pi 4B and Pi 5 builds and ZIP
+checks passed. Physical v4.5.0 acceptance remains pending for all four boards.
