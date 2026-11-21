@@ -21,7 +21,7 @@ Pi 4B 原型以 `zapps.bin` 封裝兩個 ZAPP，由韌體在開機時載入。�
 ## 開發流程
 
 1. **維護基礎系統。** Raspberry Pi fork 的 `main` 跟隨 Zephyr 上游。透過版本固定的驗證分支建置各板卡的基礎包，檢查 microSD 冷開機、UART 心跳、`DEBUG` 與 `RESET`。
-2. **獨立開發 Zavira。** 規劃以 `zavira-gui` 的 `main` 管理 Core、Theme、Desktop、Demo 和平台適配。使用短期功能分支與 PR，先在模擬環境驗證 UI 再合併。Zavira 自行標記版本。
+2. **獨立開發 Zavira。** 以 [zavira-gui](https://github.com/hypersolver/zavira-gui) 的 `main` 管理 Core、Theme、Desktop、Demo 和平台適配。使用短期功能分支與 PR，先在模擬環境驗證 UI 再合併。Zavira 自行標記版本。
 3. **整合與驗收。** 在 `rpiduino/zavira-gui` 鎖定相容的 Zephyr、LVGL 與 Zavira 版本。先驗證 QEMU 開機、風車動畫、桌面、Demo 切換與 UART，再在 Pi 4B 核對 HDMI、冷開機及 RESET 後能否回到桌面。
 4. **按用途發布。** Raspberry Pi fork 的 Release 提供基礎開機包與指定板卡的 GUI 整合包。每個包標註適用板卡、版本、驗證範圍與 SHA-256。Pi 3B 和 3B+ 共用基礎包，Pi 4B 使用獨立組態，Pi 5 完成實測後再納入。
 
@@ -35,4 +35,4 @@ Pi 4B 原型以 `zapps.bin` 封裝兩個 ZAPP，由韌體在開機時載入。�
 | 跨平台 GUI | 讓 PC 模擬器和 XDOS 使用獨立平台適配，重用風車、視覺主題與桌面元件。 |
 | Raspberry Pi 5 | 先驗證基礎開機與 UART，再評估顯示與輸入整合。 |
 
-目前基礎開機與 UART 心跳已在 Pi 3B、3B+ 和 Pi 4B 實測。Zavira 的動畫、桌面、Demo 切換、心跳與 `DEBUG` 已在 QEMU 驗證。Pi 4B Zavira 實機 HDMI／RESET、獨立 Zavira 倉庫、Arduino API、USB 輸入與 Pi 5 仍在規劃或驗證中。基礎版 GitHub Release 仍是草稿。
+目前基礎開機與 UART 心跳已在 Pi 3B、3B+ 和 Pi 4B 實測。Zavira 的動畫、桌面、Demo 切換、心跳與 `DEBUG` 已在 QEMU 驗證。Pi 4B Zavira 實機 HDMI／RESET、Arduino API、USB 輸入與 Pi 5 仍在規劃或驗證中。[基礎韌體已發布](https://github.com/hypersolver/Zephry-for-Raspberry-Pi/releases/tag/rpiduino-v4.5.0-base)。[Pi 4B 整合建置說明](zavira-pi4/README.md)

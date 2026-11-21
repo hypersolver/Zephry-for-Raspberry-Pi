@@ -1,0 +1,6 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+&{/soc} {
+	power: power-controller@fe100000 {
+		reg = <0xfe100000 0x1000>;
+	};
+};

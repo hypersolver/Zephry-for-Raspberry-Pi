@@ -31,16 +31,16 @@ flowchart LR
     F --> B["Versioned Raspberry Pi validation branches"]
     B --> R["Base microSD releases<br/>Pi 3B / 3B+ and Pi 4B"]
     B --> I["rpiduino/zavira-gui<br/>Pi 4B integration"]
-    G["zavira-gui (planned)<br/>Independent main and release tags"] -.->|Pinned Zavira revision| I
+    G["zavira-gui<br/>Independent main and release tags"] -.->|Pinned Zavira revision| I
     I --> P["Pi 4B Zavira microSD package"]
 ```
 
 - **[Zephry-for-Raspberry-Pi](https://github.com/hypersolver/Zephry-for-Raspberry-Pi)** owns the Raspberry Pi port, boot packaging, and hardware validation. Pi 3B and 3B+ share a base boot package. Pi 4B uses its own image. Pi 5 hardware validation is planned.
-- **`zavira-gui`** is the planned independent home for core APIs, theme, desktop, examples, and platform adapters. Work starts from `main` in short-lived feature branches and returns through pull requests. Zavira releases have their own version tags.
-- **[`rpiduino/zavira-gui`](https://github.com/hypersolver/Zephry-for-Raspberry-Pi/tree/rpiduino/zavira-gui)** is the Pi 4B integration branch. The integration will pin compatible Zephyr, LVGL, and Zavira revisions and package the desktop and demo alongside the kernel.
+- **[zavira-gui](https://github.com/hypersolver/zavira-gui)** is the independent home for core APIs, theme, desktop, examples, and platform adapters. Work starts from `main` in short-lived feature branches and returns through pull requests. Zavira releases have their own version tags.
+- **[`rpiduino/zavira-gui`](https://github.com/hypersolver/Zephry-for-Raspberry-Pi/tree/rpiduino/zavira-gui)** is the Pi 4B integration branch. The integration pins compatible Zephyr, LVGL, and Zavira revisions and package the desktop and demo alongside the kernel.
 
 ## Validation status
 
-The base boot and UART heartbeat have been exercised on Pi 3B, Pi 3B+, and Pi 4B. The Zavira prototype has been built for Pi 4B, and QEMU has verified the animated splash, Launcher, Demo switching, heartbeat, and `DEBUG`. Pi 4B HDMI and `RESET` for the Zavira image, the independent Zavira repository, and Arduino integration are pending.
+The base boot and UART heartbeat have been exercised on Pi 3B, Pi 3B+, and Pi 4B. The Zavira prototype has been built for Pi 4B, and QEMU has verified the animated splash, Launcher, Demo switching, heartbeat, and `DEBUG`. Pi 4B HDMI and `RESET` for the Zavira image and Arduino integration are pending.
 
-The base boot ZIPs are prepared locally. Their GitHub release remains a draft until the assets are uploaded.
+The base boot ZIPs are available in the [base firmware release](https://github.com/hypersolver/Zephry-for-Raspberry-Pi/releases/tag/rpiduino-v4.5.0-base). See the [Pi 4B integration and build instructions](zavira-pi4/README.md).

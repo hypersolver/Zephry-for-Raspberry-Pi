@@ -21,7 +21,7 @@ The Pi 4B prototype packages both modules in `zapps.bin`. The modules define the
 ## Development workflow
 
 1. **Maintain the base system.** Keep the Raspberry Pi fork's `main` aligned with upstream Zephyr. Use version-pinned validation branches for board builds and verify cold boot, UART heartbeat, `DEBUG`, and `RESET`.
-2. **Develop Zavira independently.** The planned `zavira-gui` repository will use `main` for the core, theme, desktop, demo, and platform adapters. Use short-lived branches and pull requests, validate UI changes in simulation, and tag Zavira releases independently.
+2. **Develop Zavira independently.** The [zavira-gui](https://github.com/hypersolver/zavira-gui) repository uses `main` for the core, theme, desktop, demo, and platform adapters. Use short-lived branches and pull requests, validate UI changes in simulation, and tag Zavira releases independently.
 3. **Integrate and validate.** Pin compatible Zephyr, LVGL, and Zavira revisions on `rpiduino/zavira-gui`. Verify boot, splash animation, Launcher, Demo switching, and UART in QEMU, then check HDMI, cold boot, and reboot-to-desktop on the Pi 4B.
 4. **Publish by board and purpose.** Publish base and GUI boot packages with a board name, software version, validation scope, and SHA-256 checksum. Pi 3B and 3B+ share a base package. Pi 4B has a separate image. Add Pi 5 after hardware validation.
 
@@ -37,4 +37,4 @@ The Pi 4B prototype packages both modules in `zapps.bin`. The modules define the
 
 ## Validation status
 
-Base boot and UART heartbeat have been exercised on Pi 3B, Pi 3B+, and Pi 4B. The Zavira animation, Launcher, Demo switching, heartbeat, and `DEBUG` have been verified in QEMU. HDMI and `RESET` for the Zavira image still need Pi 4B hardware validation. The independent Zavira repository, Arduino API, USB input, and Pi 5 validation are planned. The base boot package release is currently a GitHub draft.
+Base boot and UART heartbeat have been exercised on Pi 3B, Pi 3B+, and Pi 4B. The Zavira animation, Launcher, Demo switching, heartbeat, and `DEBUG` have been verified in QEMU. HDMI and `RESET` for the Zavira image still need Pi 4B hardware validation. The Arduino API, USB input, and Pi 5 validation are planned. The [base firmware release](https://github.com/hypersolver/Zephry-for-Raspberry-Pi/releases/tag/rpiduino-v4.5.0-base) and [Pi 4B integration build instructions](zavira-pi4/README.md) are available on GitHub.
