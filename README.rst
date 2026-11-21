@@ -1,3 +1,27 @@
+Zephry for Raspberry Pi
+=======================
+
+This Zephyr RTOS fork brings microSD boot, UART diagnostics, and an optional
+LVGL desktop to Raspberry Pi. The base images target Pi 3B, Pi 3B+, and Pi 4B.
+Zavira GUI is an experimental Pi 4B integration with an animated splash screen,
+an application launcher, and an independent LVGL Demo ZAPP.
+
+Start here
+----------
+
+* `English project overview <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/blob/rpiduino/zavira-gui/docs/rpiduino/project-overview.en.md>`_
+* `繁體中文專案導覽 <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/blob/rpiduino/zavira-gui/docs/rpiduino/project-overview.md>`_
+* `Runtime architecture diagram <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/blob/rpiduino/zavira-gui/docs/rpiduino/architecture.md#runtime-architecture>`_
+* `GitHub repository architecture diagram <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/blob/rpiduino/zavira-gui/docs/rpiduino/architecture.md#github-repositories>`_
+* `Base firmware Releases <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/releases>`_ — the base release is still a draft, so public downloads are pending.
+
+Base boot and UART heartbeat have been verified on Pi 3B, Pi 3B+, and Pi 4B.
+Zavira has been verified in QEMU. Pi 4B HDMI and reset testing for the Zavira
+image are pending, along with Pi 5 hardware validation.
+
+Upstream Zephyr documentation
+------------------------------
+
 .. raw:: html
 
    <a href="https://www.zephyrproject.org">
