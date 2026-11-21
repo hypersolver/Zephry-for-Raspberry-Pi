@@ -1,5 +1,7 @@
 # Project overview: Zyphry for Raspberry Pi and Zavira GUI
 
+[English](project-overview.en.md) · [架構圖](architecture.md)
+
 ## 開發動機
 
 RPiduino 想讓 Raspberry Pi 既能執行即時控制，也能以 HDMI 顯示裝置狀態與操作介面。第一步是建立可重現的 Zephyr microSD 開機及 UART 驗證流程。第二步是用 LVGL 建立可獨立更新的開機畫面、桌面與應用程式。長期目標是讓原生 Zephyr 應用與 Arduino Sketch 使用同一套 GUI 服務，並讓 XDOS 等平台透過各自的適配層重用 Zavira 的主題和元件。
