@@ -18,3 +18,5 @@ With the Ubuntu AArch64 GCC cross toolchain, set `ZEPHYR_TOOLCHAIN_VARIANT=cross
 Extract the ZIP to the FAT32 boot partition root. The Pi firmware loads `zephyr.bin` and `zapps.bin` using `config.txt`. The splash should give way to the Launcher. UART is 115200, 8N1. Use `tools/rpiduino-uart.py --port COM3 open-lvgl` or `desktop` to navigate. The heartbeat, `debug`, and `reset --verify --version v4.5.0` use the existing UART protocol.
 
 [Project overview](../project-overview.en.md) · [Architecture diagrams](../architecture.md)
+
+[TFTP updates and microSD fallback verification](network-update.md)

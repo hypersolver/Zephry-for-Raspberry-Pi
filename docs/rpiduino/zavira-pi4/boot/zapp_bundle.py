@@ -10,8 +10,10 @@ NAMES = ("desktop.zapp", "lvgl-demo.zapp")
 CAPACITY = 128 * 1024
 
 
-def make_bundle(modules: list[bytes]) -> bytes:
-    header = bytearray(struct.pack("<4sI", b"ZAPP", 2))
+def make_bundle(modules: list[bytes], *, abi_version: int = 2) -> bytes:
+    if abi_version not in (1, 2):
+        raise ValueError(f"Unsupported ZAPP bundle version: {abi_version}")
+    header = bytearray(struct.pack("<4sI", b"ZAPP", abi_version))
     payload = bytearray()
     for name, data in zip(NAMES, modules, strict=True):
         if (len(data) < 64 or data[:6] != b"\x7fELF\x02\x01"
