@@ -24,3 +24,7 @@ python tools/rpiduino-uart.py --port COM3 reset --verify --version v4.5.0 --seco
 2. Stop TFTP without disconnecting Ethernet, then repeat the UART reset command with `--seconds 150 --log pi4-fallback.log`. Confirm network attempt and timeouts followed by `Boot mode: SD (01)`, the same Zephyr banner, Zavira desktop, and heartbeats. On the tested board the switch to SD occurred about 90 seconds after reset because EEPROM waited for multiple individual TFTP requests.
 
 The published Pi 4B Zavira ZIP was also tested from microSD with the HDMI LVGL Demo, UART `DEBUG`, and UART `RESET`.
+
+## Benchmark build
+
+Use the same compact TFTP workflow with rpiduino-zephyr-4.5.0-pi4-zavira-benchmark.zip. The updated tool also supports previous two-module boot packages.

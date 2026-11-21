@@ -9,12 +9,11 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import BadZipFile, ZipFile
 
-from zapp_bundle import NAMES, make_bundle
+from zapp_bundle import bundle_names, make_bundle
 
 
 BASE_FILES = {"config.txt", "zephyr.bin", "bcm2711-rpi-4-b.dtb", "start4.elf",
               "fixup4.dat", "LICENCE.broadcom"}
-ZAPP_FILES = {*NAMES, "zapps.bin"}
 OUTER_CONFIG = b"[all]\nboot_ramdisk=1\n"
 IMAGE_SIZE = 36 * 1024 * 1024
 COMPACT_IMAGE_SIZE = 8 * 1024 * 1024
@@ -26,7 +25,9 @@ def extract_package(package: Path, destination: Path) -> list[str]:
     with ZipFile(package) as archive:
         entries = archive.infolist()
         names = {entry.filename for entry in entries}
-        if len(names) != len(entries) or names not in (BASE_FILES, BASE_FILES | ZAPP_FILES):
+        boot_layouts = (BASE_FILES, BASE_FILES | {"zapps.bin", *bundle_names(2)},
+                        BASE_FILES | {"zapps.bin", *bundle_names(3)})
+        if len(names) != len(entries) or names not in boot_layouts:
             raise ValueError("Expected a Pi 4B base or Zavira boot ZIP")
         if any(entry.file_size == 0 for entry in entries):
             raise ValueError("A required boot file is empty")
@@ -38,12 +39,15 @@ def extract_package(package: Path, destination: Path) -> list[str]:
         kernel = archive.read("zephyr.bin")
         if kernel[56:60] != b"ARM\x64" or int.from_bytes(kernel[:4], "little") >> 26 != 0b000101:
             raise ValueError("Expected an AArch64 boot image with an entry branch")
-        if ZAPP_FILES <= names:
+        if "zapps.bin" in names:
             if not {"ramfsfile=zapps.bin", "ramfsaddr=0x02000000"} <= set(config):
                 raise ValueError("Unexpected ZAPP bundle load configuration")
             bundle = archive.read("zapps.bin")
             abi_version = int.from_bytes(bundle[4:8], "little")
-            if make_bundle([archive.read(name) for name in NAMES], abi_version=abi_version) != bundle:
+            modules = bundle_names(abi_version)
+            if names != BASE_FILES | {"zapps.bin", *modules}:
+                raise ValueError("Unexpected set of ZAPP modules")
+            if make_bundle([archive.read(name) for name in modules], abi_version=abi_version) != bundle:
                 raise ValueError("ZAPP modules do not match zapps.bin")
         for name in sorted(names):
             with archive.open(name) as source, (destination / name).open("wb") as output:

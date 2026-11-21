@@ -3,6 +3,7 @@
 #include <lvgl.h>
 #include <string.h>
 #include <rpiduino/zapp.h>
+#include <rpiduino/zapp_input.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/display.h>
 #include <zephyr/kernel.h>
@@ -17,7 +18,6 @@
 
 #define BUNDLE_ADDRESS (IS_ENABLED(CONFIG_BOARD_RPI_4B) ? 0x02000000U : 0x47000000U)
 #define BUNDLE_CAPACITY (128U * 1024U)
-#define BUNDLE_HEADER 24U
 
 struct zapp {
 	const char *name;
@@ -30,11 +30,13 @@ struct zapp {
 
 static struct zapp desktop = {.name = "desktop"};
 static struct zapp demo = {.name = "lvgl-demo"};
+static struct zapp benchmark = {.name = "lvgl-benchmark"};
 static atomic_t pending_page;
+static uint32_t redraws;
 
 void zapp_request(enum zapp_page page)
 {
-	if (page == ZAPP_DESKTOP || page == ZAPP_DEMO) {
+	if (page >= ZAPP_DESKTOP && page <= ZAPP_BENCHMARK) {
 		atomic_set(&pending_page, page);
 	}
 }
@@ -97,6 +99,7 @@ static void button(int x, int y, int width, int height, const char *text,
 	lv_label_set_text(caption, text);
 	lv_obj_center(caption);
 	lv_obj_add_event_cb(object, open_button, LV_EVENT_CLICKED, (void *)(uintptr_t)destination);
+	zapp_input_add_button(object);
 }
 
 static void *bar(int x, int y, int width, int height, uint32_t color)
@@ -168,10 +171,27 @@ static void set_triangle(void *object, const struct zapp_point points[3])
 	}
 }
 
+static void redraw_complete(lv_event_t *event)
+{
+	ARG_UNUSED(event);
+	redraws++;
+}
+
+static uint32_t redraw_count(void)
+{
+	return redraws;
+}
+
+static void report_benchmark(uint32_t count, uint32_t elapsed_ms)
+{
+	printk("RPiduino BENCH: redraws=%u elapsed_ms=%u\n", count, elapsed_ms);
+}
+
 static const struct zapp_ui ui = {
 	.version = KERNEL_VERSION_STRING, .scene = scene, .panel = panel, .label = label,
 	.set_text = set_text, .button = button, .bar = bar, .set_bar = set_bar,
 	.triangle = triangle, .set_triangle = set_triangle,
+	.redraw_count = redraw_count, .report_benchmark = report_benchmark,
 };
 
 static int locate_zapps(void)
@@ -180,13 +200,15 @@ static int locate_zapps(void)
 
 	device_map(&mapped, BUNDLE_ADDRESS, BUNDLE_CAPACITY, K_MEM_CACHE_WB);
 	const uint8_t *bundle = (const uint8_t *)(uintptr_t)mapped;
-	if (memcmp(bundle, "ZAPP", 4) != 0 || sys_get_le32(bundle + 4) != 2) {
+	uint32_t version = sys_get_le32(bundle + 4);
+	if (memcmp(bundle, "ZAPP", 4) != 0 || version < 1 || version > 3) {
 		return -ENOENT;
 	}
 
-	struct zapp *slots[] = {&desktop, &demo};
-	size_t offset = BUNDLE_HEADER;
-	for (size_t i = 0; i < ARRAY_SIZE(slots); i++) {
+	struct zapp *slots[] = {&desktop, &demo, &benchmark};
+	size_t count = version == 3 ? ARRAY_SIZE(slots) : 2;
+	size_t offset = 8 + count * 8;
+	for (size_t i = 0; i < count; i++) {
 		size_t size = sys_get_le32(bundle + 8 + i * 8);
 		uint32_t expected = sys_get_le32(bundle + 12 + i * 8);
 
@@ -205,6 +227,9 @@ static int load_zapp(struct zapp *app)
 {
 	if (app->extension) {
 		return 0;
+	}
+	if (!app->data) {
+		return -ENOENT;
 	}
 	struct llext_buf_loader loader = LLEXT_TEMPORARY_BUF_LOADER(app->data, app->size);
 	struct llext_load_param parameters = LLEXT_LOAD_PARAM_DEFAULT;
@@ -245,6 +270,9 @@ static void gui(void *one, void *two, void *three)
 		printk("RPiduino HDMI: unblank failed (%d)\n", result);
 		return;
 	}
+	zapp_input_init();
+	lv_display_add_event_cb(lv_display_get_default(), redraw_complete, LV_EVENT_RENDER_READY,
+				NULL);
 
 	desktop.render(&ui, ZAPP_SPLASH);
 	printk("RPiduino ZAPP: splash\n");
@@ -259,8 +287,9 @@ static void gui(void *one, void *two, void *three)
 		}
 		if (!splash_until) {
 			enum zapp_page page = atomic_set(&pending_page, 0);
-			if (page == ZAPP_DESKTOP || page == ZAPP_DEMO) {
-				struct zapp *next = page == ZAPP_DEMO ? &demo : &desktop;
+			if (page >= ZAPP_DESKTOP && page <= ZAPP_BENCHMARK) {
+				struct zapp *apps[] = {&desktop, &demo, &benchmark};
+				struct zapp *next = apps[page - ZAPP_DESKTOP];
 
 				result = load_zapp(next);
 				if (result < 0) {

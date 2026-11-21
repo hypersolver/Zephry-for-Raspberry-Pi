@@ -1,4 +1,4 @@
-"""Pack the desktop loader and LVGL Demo as a Pi firmware RAM payload."""
+"""Pack Zavira and its LVGL applications as a Pi firmware RAM payload."""
 
 import argparse
 import struct
@@ -6,16 +6,24 @@ from pathlib import Path
 from zlib import crc32
 
 
-NAMES = ("desktop.zapp", "lvgl-demo.zapp")
+NAMES = ("desktop.zapp", "lvgl-demo.zapp", "lvgl-benchmark.zapp")
 CAPACITY = 128 * 1024
 
 
-def make_bundle(modules: list[bytes], *, abi_version: int = 2) -> bytes:
-    if abi_version not in (1, 2):
-        raise ValueError(f"Unsupported ZAPP bundle version: {abi_version}")
+def bundle_names(abi_version: int) -> tuple[str, ...]:
+    if abi_version in (1, 2):
+        return NAMES[:2]
+    if abi_version == 3:
+        return NAMES
+    raise ValueError(f"Unsupported ZAPP bundle version: {abi_version}")
+
+
+def make_bundle(modules: list[bytes], *, abi_version: int = 3) -> bytes:
+    if len(modules) != len(bundle_names(abi_version)):
+        raise ValueError("Unexpected ZAPP module count")
     header = bytearray(struct.pack("<4sI", b"ZAPP", abi_version))
     payload = bytearray()
-    for name, data in zip(NAMES, modules, strict=True):
+    for name, data in zip(bundle_names(abi_version), modules, strict=True):
         if (len(data) < 64 or data[:6] != b"\x7fELF\x02\x01"
                 or struct.unpack_from("<HH", data, 16) != (1, 183)):
             raise ValueError(f"{name} must be a little-endian AArch64 relocatable ELF")

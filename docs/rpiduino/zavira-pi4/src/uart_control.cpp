@@ -8,6 +8,7 @@
 #include <zephyr/sys/reboot.h>
 #ifdef RPIDUINO_ZAPP_DESKTOP
 #include <rpiduino/zapp.h>
+#include <rpiduino/zapp_input.h>
 #endif
 
 namespace {
@@ -43,6 +44,14 @@ void pollUartControl()
                 } else if (strcmp(line, "@RPIDUINO OPEN LVGL") == 0) {
                     zapp_request(ZAPP_DEMO);
                     printk("@RPIDUINO QUEUED\n");
+                } else if (strcmp(line, "@RPIDUINO OPEN BENCH") == 0) {
+                    zapp_request(ZAPP_BENCHMARK);
+                    printk("@RPIDUINO QUEUED\n");
+                } else if (strncmp(line, "@RPIDUINO MOUSE ", 16) == 0 ||
+                           strncmp(line, "@RPIDUINO KEY ", 14) == 0) {
+                    if (!zapp_input_command(line + 10)) {
+                        printk("@RPIDUINO ERROR INPUT\n");
+                    }
                 } else if (strcmp(line, "@RPIDUINO DESKTOP") == 0) {
                     zapp_request(ZAPP_DESKTOP);
                     printk("@RPIDUINO QUEUED\n");

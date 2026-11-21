@@ -60,13 +60,17 @@ def capture(port, seconds, log=None, verify=False, version=None):
         print(f"Received {total} bytes.")
 
 
-def exchange(port, command, expected, timeout=3):
+def send_command(port, command):
     frame = f"@RPIDUINO {command}\n".encode("ascii")
     # The Pi console polls the mini-UART's eight-byte hardware FIFO.
     for offset in range(0, len(frame), 4):
         port.write(frame[offset : offset + 4])
         port.flush()
         time.sleep(0.004)
+
+
+def exchange(port, command, expected, timeout=3):
+    send_command(port, command)
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         line = port.readline().decode("ascii", errors="backslashreplace").strip()
@@ -75,6 +79,68 @@ def exchange(port, command, expected, timeout=3):
         if line == expected or (expected.endswith(" ") and line.startswith(expected)):
             return line
     raise TimeoutError(f"No expected RPiduino reply to {command.split()[0]}")
+
+
+def gui_input(port):
+    import tkinter as tk
+
+    window = tk.Tk()
+    window.title("Zavira COM input")
+    tk.Label(window, text="Use this area as the HDMI pointer. "
+             "Tab / Shift+Tab selects, Enter opens, Esc goes back.").pack(padx=12, pady=8)
+    pad = tk.Canvas(window, width=640, height=480, background="#171432",
+                    highlightthickness=0)
+    pad.pack(fill="both", expand=True)
+    position = None
+    pressed = False
+    last_position = None
+
+    def move(event):
+        nonlocal position
+        x = min(639, max(0, event.x * 640 // max(1, pad.winfo_width())))
+        y = min(479, max(0, event.y * 480 // max(1, pad.winfo_height())))
+        position = (x, y)
+
+    def flush_pointer():
+        nonlocal last_position
+        if position is not None:
+            state = (*position, int(pressed))
+            if state != last_position:
+                send_command(port, "MOUSE %03d %03d %d" % state)
+                last_position = state
+        # Drain heartbeats and application logs while holding the port.
+        if port.in_waiting:
+            print(port.read(port.in_waiting).decode("ascii", "backslashreplace"), end="")
+
+    def button(event, down):
+        nonlocal pressed
+        move(event)
+        pressed = down
+        flush_pointer()
+
+    def key(command):
+        send_command(port, "KEY " + command)
+        return "break"
+
+    def refresh():
+        flush_pointer()
+        window.after(40, refresh)
+
+    def close():
+        nonlocal pressed
+        pressed = False
+        flush_pointer()
+        window.destroy()
+
+    pad.bind("<Motion>", move)
+    pad.bind("<ButtonPress-1>", lambda event: button(event, True))
+    pad.bind("<ButtonRelease-1>", lambda event: button(event, False))
+    for event, command in (("<Tab>", "NEXT"), ("<Shift-Tab>", "PREV"),
+                           ("<Return>", "ENTER"), ("<Escape>", "ESC")):
+        window.bind(event, lambda _, command=command: key(command))
+    window.protocol("WM_DELETE_WINDOW", close)
+    refresh()
+    window.mainloop()
 
 
 def stage_image(port, image):
@@ -107,6 +173,8 @@ def main():
     commands.add_parser("ping")
     commands.add_parser("debug")
     commands.add_parser("open-lvgl", help="Launch the LVGL Demo ZAPP")
+    commands.add_parser("open-benchmark", help="Launch the LVGL Benchmark ZAPP")
+    commands.add_parser("gui-input", help="Control the HDMI pointer and focus from a Tk window")
     commands.add_parser("desktop", help="Return to the ZAPP desktop")
     reset = commands.add_parser("reset", help="Reboot via UART and optionally verify the next boot")
     reset.add_argument("--verify", action="store_true")
@@ -155,8 +223,11 @@ def main():
             print(exchange(port, "PING", "@RPIDUINO READY 1"))
             if args.command == "debug":
                 print(exchange(port, "DEBUG", "@RPIDUINO DEBUG "))
-            elif args.command in ("open-lvgl", "desktop"):
-                command = "OPEN LVGL" if args.command == "open-lvgl" else "DESKTOP"
+            elif args.command == "gui-input":
+                gui_input(port)
+            elif args.command in ("open-lvgl", "open-benchmark", "desktop"):
+                command = {"open-lvgl": "OPEN LVGL", "open-benchmark": "OPEN BENCH",
+                           "desktop": "DESKTOP"}[args.command]
                 print(exchange(port, command, "@RPIDUINO QUEUED"))
             elif args.command == "reset":
                 print(exchange(port, "RESET", "@RPIDUINO RESETTING"), flush=True)
