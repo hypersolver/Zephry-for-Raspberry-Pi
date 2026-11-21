@@ -13,7 +13,7 @@ Start here
 * `繁體中文專案導覽 <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/blob/rpiduino/zavira-gui/docs/rpiduino/project-overview.md>`_
 * `Runtime architecture diagram <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/blob/rpiduino/zavira-gui/docs/rpiduino/architecture.md#runtime-architecture>`_
 * `GitHub repository architecture diagram <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/blob/rpiduino/zavira-gui/docs/rpiduino/architecture.md#github-repositories>`_
-* `Base firmware Releases <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/releases>`_ — the base release is still a draft, so public downloads are pending.
+* `Base firmware Releases <https://github.com/hypersolver/Zephry-for-Raspberry-Pi/releases/tag/rpiduino-v4.5.0-base>`_ — download the Pi 3B / 3B+ or Pi 4B microSD boot package.
 
 Base boot and UART heartbeat have been verified on Pi 3B, Pi 3B+, and Pi 4B.
 Zavira has been verified in QEMU. Pi 4B HDMI and reset testing for the Zavira
