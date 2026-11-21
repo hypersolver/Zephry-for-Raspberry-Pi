@@ -31,3 +31,7 @@ Expected output is a Zephyr boot banner, one setup line, and four approximately
 one-second heartbeats. The v4.5.0 candidate passed this check with QEMU raspi3b.
 Physical v4.5.0 acceptance is ordered Pi 3B, Pi 3B+, Pi 4B, then Pi 5.
 The earlier v4.4.1 Pi 3 heartbeats were confirmed on Pi 3B and Pi 3B+.
+
+UART RESET requires adapter TX to physical pin 10. Run the UART tool with reset --verify to collect the next boot on the same port.
+
+QEMU raspi3b confirmed a guest reset, fresh setup, and four heartbeats. Physical v4.5.0 validation is pending.

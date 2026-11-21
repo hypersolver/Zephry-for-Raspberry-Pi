@@ -106,6 +106,11 @@ def main():
             action.add_argument("--version", help="Require an exact boot banner version, e.g. v4.5.0")
     commands.add_parser("ping")
     commands.add_parser("debug")
+    reset = commands.add_parser("reset", help="Reboot via UART and optionally verify the next boot")
+    reset.add_argument("--verify", action="store_true")
+    reset.add_argument("--seconds", type=float, default=90)
+    reset.add_argument("--version")
+    reset.add_argument("--log", type=Path)
     commands.add_parser("boot-clear", help="Restore the firmware's default IMG on next boot")
     stage = commands.add_parser("stage", help="Copy to volatile RAM and verify CRC32")
     stage.add_argument("image", type=Path)
@@ -119,8 +124,12 @@ def main():
         return
     if not args.port:
         parser.error("--port is required for this command")
-    if args.command in ("monitor", "verify") and args.seconds <= 0:
+    if args.command in ("monitor", "verify", "reset") and args.seconds <= 0:
         parser.error("--seconds must be positive")
+    if args.command == "reset" and not args.verify and (args.log or args.version):
+        parser.error("--log and --version require reset --verify")
+    if args.command == "reset" and args.log and args.log.exists():
+        parser.error("--log must name a new file")
 
     try:
         image = args.image.read_bytes() if args.command in ("stage", "update") else None
@@ -144,6 +153,10 @@ def main():
             print(exchange(port, "PING", "@RPIDUINO READY 1"))
             if args.command == "debug":
                 print(exchange(port, "DEBUG", "@RPIDUINO DEBUG "))
+            elif args.command == "reset":
+                print(exchange(port, "RESET", "@RPIDUINO RESETTING"), flush=True)
+                if args.verify:
+                    capture(port, args.seconds, args.log, True, args.version)
             elif args.command == "boot-clear":
                 print(exchange(port, "BOOT-CLEAR", "@RPIDUINO OK", timeout=30))
             elif image is not None:

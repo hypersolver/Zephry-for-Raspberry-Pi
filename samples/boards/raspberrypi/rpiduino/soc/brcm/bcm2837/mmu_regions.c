@@ -10,6 +10,7 @@
 
 static const struct arm_mmu_region regions[] = {
 	DEVICE_REGION(gpio),
+	DEVICE_REGION(power),
 	DEVICE_REGION(uart1),
 	DEVICE_REGION(local_intc),
 };

@@ -6,3 +6,5 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(rpiduino_zephyr LANGUAGES C CXX)
 target_include_directories(app PRIVATE include)
 target_sources(app PRIVATE src/main.cpp sketches/heartbeat.cpp)
+
+target_sources(app PRIVATE src/uart_control.cpp)
